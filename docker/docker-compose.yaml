@@ -1,0 +1,9 @@
+version: '2'
+
+services:
+  crng:
+    hostname: crng
+    build: .
+    ports:
+      - "9003:2003"
+      - "9013:2013"
