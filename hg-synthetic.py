@@ -17,10 +17,12 @@ import uuid
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 req.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
+
 class SyntheticMetric:
     name = ''
     value = 0
     tags = {}
+
     def __init__(self, name, value, step_number, runner, request_method, info, instance_name, org_id,
                  start_timestamp, end_timestamp, duration_ms,
                  transaction_id, transaction_timestamp, unit,
@@ -36,33 +38,33 @@ class SyntheticMetric:
       self.tags['org_id'] = org_id
       self.tags['unit'] = unit
       self.tags['mtype'] = metric_type
-      self.tags['start_timestamp'] = start_timestamp
-      self.tags['end_timestamp'] = end_timestamp
-      self.tags['duration_ms'] = duration_ms
-      self.tags['transaction_id'] = transaction_id
-      self.tags['transaction_timestamp'] = transaction_timestamp
-    
+      #self.tags['start_timestamp'] = start_timestamp
+      #self.tags['end_timestamp'] = end_timestamp
+      #self.tags['duration_ms'] = duration_ms
+      #self.tags['transaction_id'] = transaction_id
+      #self.tags['transaction_timestamp'] = transaction_timestamp
+
     def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=True, indent=4)
+        return json.dumps(self, default=lambda o: o.__dict__,
+                          sort_keys=True, indent=4)
+
     def toGRAPHITE(self):
         tags_flattened = 'step={};'.format(self.tags['synthetic_step'])
         #tags_flattened += 'short_description=Short_Description;'
         tags_flattened += 'runner={};'.format(self.tags['runner'])
-        tags_flattened += 'request_method={};'.format(self.tags['request_method'])
+        tags_flattened += 'request_method={};'.format(
+            self.tags['request_method'])
         tags_flattened += 'info={};'.format(self.tags['info'])
-        tags_flattened += 'instance_name={};'.format(self.tags['instance_name'])
+        tags_flattened += 'instance_name={};'.format(
+            self.tags['instance_name'])
         tags_flattened += 'org_id={};'.format(self.tags['org_id'])
         tags_flattened += 'mtype={};'.format(self.tags['mtype'])
-        tags_flattened += 'start_timestamp={};'.format(self.tags['start_timestamp'])
-        tags_flattened += 'end_timestamp={};'.format(self.tags['end_timestamp'])
-        tags_flattened += 'duration_ms={};'.format(self.tags['duration_ms'])
-        #tags_flattened += 'transaction_id={};'.format(self.tags['transaction_id'])
-        tags_flattened += 'mtype={};'.format(self.tags['mtype'])
         tags_flattened += 'unit={}'.format(self.tags['unit'])
-
-        return '{};{} {} {}'.format(self.name, tags_flattened, self.value, self.tags['transaction_timestamp'])
-
+        #tags_flattened += 'start_timestamp={};'.format(self.tags['start_timestamp'])
+        #tags_flattened += 'end_timestamp={};'.format(self.tags['end_timestamp'])
+        #tags_flattened += 'duration_ms={};'.format(self.tags['duration_ms'])
+        #tags_flattened += 'transaction_id={};'.format(self.tags['transaction_id'])
+        return '{};{} {} {}'.format(self.name, tags_flattened, self.value, transaction_timestamp)
 
 
 def current_milli_time():
@@ -70,6 +72,7 @@ def current_milli_time():
     returns current time in milliseconds since epoch
     """
     return int(round(time.time() * 1000))
+
 
 def current_second_time():
     """
@@ -96,7 +99,8 @@ def synthetic_get(a_session,
     synthetic_result = 0
     start_timestamp = current_milli_time()
     # start synthetic
-    resp = a_session.get(target, verify=False, allow_redirects=False, cookies=cookies, headers=headers)
+    resp = a_session.get(
+        target, verify=False, allow_redirects=False, cookies=cookies, headers=headers)
     # end of synthetic
     end_timestamp = current_milli_time()
     # check the status code
@@ -123,7 +127,7 @@ def synthetic_get(a_session,
         transaction_timestamp,
         'boolean',
         str(metric_type)
-    ))
+          ))
 
     metrics.append(
       SyntheticMetric(
@@ -185,6 +189,7 @@ def synthetic_get(a_session,
     # return metrics, result, and the http response object
     return metrics, synthetic_result, resp
 
+
 def post_login(config, data):
     """
     performs target request using cookie
@@ -210,6 +215,7 @@ def post_login(config, data):
         allow_redirects=False)
     #print resp.request.headers
     return resp
+
 
 def synthetic_post(config, step_number, expected_response_code, data):
     metrics = []
@@ -328,7 +334,7 @@ def step1(config):
       None,
       None,
       metric_type='gauge')
-    return synthetic_metrics, synthetic_result, response 
+    return synthetic_metrics, synthetic_result, response
 
 
 def step2(config, step1_response):
@@ -353,7 +359,8 @@ def step2(config, step1_response):
       None,
       metric_type='gauge'
     )
-    return synthetic_metrics, synthetic_result, response 
+    return synthetic_metrics, synthetic_result, response
+
 
 def step3(config):
     '''
@@ -383,7 +390,7 @@ def step3(config):
       headers,
       metric_type='gauge'
     )
-    return synthetic_metrics, synthetic_result, response 
+    return synthetic_metrics, synthetic_result, response
 
 
 def step4(config, step3_response):
@@ -404,7 +411,7 @@ def step4(config, step3_response):
     except:
       print "state not returned in step3, ERROR!"
     '''
-    response contains 
+    response contains
     <a href="https://grafana.com/oauth2/authorize?access_type=online&amp;client_id=f1383f63a6a46680e384&amp;redirect_uri=https%3A%2F%2Fbkgann3.grafana.net%2Flogin%2Fgrafana_com&amp;response_type=code&amp;scope=user%3Aemail&amp;state=nogNCBRynxOi1cKyj5vld5jUfogbTWqV5n45NAINgpQ%3D">Found</a>.
     '''
     # get the client_id for use later
@@ -436,6 +443,7 @@ def step4(config, step3_response):
       metric_type='gauge'
     )
     return synthetic_metrics, synthetic_result, response, client_id, state_hash, target
+
 
 def step5(config, step4_response):
     headers = {
@@ -470,6 +478,7 @@ def step5(config, step4_response):
     )
     return synthetic_metrics, synthetic_result, response
 
+
 def step6(config):
     config['target'] = "https://grafana.com/api/login"
     print 'Step 6: Target: {}'.format(config['target'])
@@ -477,14 +486,17 @@ def step6(config):
       'login': config['username'],
       'password': config['password']
     }
-    synthetic_metrics, synthetic_result, response = synthetic_post(config, 6, 200, data)
+    synthetic_metrics, synthetic_result, response = synthetic_post(
+        config, 6, 200, data)
     return synthetic_metrics, synthetic_result, response
+
 
 def step7(config, cookies, client_id):
     '''
     Get OAuth2 Clients
     '''
-    config['target'] = 'https://grafana.com/api/oauth2/clients/{}'.format(client_id)
+    config['target'] = 'https://grafana.com/api/oauth2/clients/{}'.format(
+        client_id)
     print 'Step 7: Target: {}'.format(config['target'])
     synthetic_metrics, synthetic_result, response = synthetic_get(
       config['a_session'],
@@ -503,11 +515,13 @@ def step7(config, cookies, client_id):
     )
     return synthetic_metrics, synthetic_result, response
 
+
 def step8(config, cookies, client_id):
     '''
     Get OAuth2 Grants
     '''
-    config['target'] = 'https://grafana.com/api/oauth2/grants?clientId={}'.format(client_id)
+    config['target'] = 'https://grafana.com/api/oauth2/grants?clientId={}'.format(
+        client_id)
     print 'Step 8: Target: {}'.format(config['target'])
     synthetic_metrics, synthetic_result, response = synthetic_get(
       config['a_session'],
@@ -550,8 +564,10 @@ def step9(config):
     }
     print 'Step 9: Target: {}'.format(config['target'])
 
-    synthetic_metrics, synthetic_result, response = synthetic_post(config, 9, 200, data)
+    synthetic_metrics, synthetic_result, response = synthetic_post(
+        config, 9, 200, data)
     return synthetic_metrics, synthetic_result, response
+
 
 def step10(config, cookies, oauth_token):
     '''
@@ -579,6 +595,7 @@ def step10(config, cookies, oauth_token):
       metric_type='gauge'
     )
     return synthetic_metrics, synthetic_result, response
+
 
 def step11(config, cookies):
     print 'Step 10: Target: {}'.format(config['target'])
@@ -620,6 +637,7 @@ def step11(config, cookies):
         print "ERROR"
     '''
 
+
 def perform_synthetic(instance, org_id, runner, username, password):
     all_metrics = []
 
@@ -646,24 +664,27 @@ def perform_synthetic(instance, org_id, runner, username, password):
     # STEP 2
     config['cookies'] = step1_response.cookies
     cookies = step1_response.cookies
-    synthetic_metrics, synthetic_result, step1_response = step2(config, step1_response)
+    synthetic_metrics, synthetic_result, step1_response = step2(
+        config, step1_response)
     all_metrics.extend(synthetic_metrics)
 
     # STEP 3: login with grafana.com, this will be a redirect
     # https://<instancename>.grafana.net/login/grafana_com
-    config['target'] = 'https://{}.grafana.net/login/grafana_com'.format(instance)
+    config['target'] = 'https://{}.grafana.net/login/grafana_com'.format(
+        instance)
     synthetic_metrics, synthetic_result, step3_response = step3(config)
     all_metrics.extend(synthetic_metrics)
 
     # STEP 4
-    synthetic_metrics, synthetic_result, step4_response, client_id, state_hash, target = step4(config, step3_response)
+    synthetic_metrics, synthetic_result, step4_response, client_id, state_hash, target = step4(
+        config, step3_response)
     all_metrics.extend(synthetic_metrics)
     # used in step 10
     config['state_hash'] = state_hash
 
-
     # STEP 5
-    synthetic_metrics, synthetic_result, step5_response = step5(config, step4_response)
+    synthetic_metrics, synthetic_result, step5_response = step5(
+        config, step4_response)
     all_metrics.extend(synthetic_metrics)
 
     # STEP 6 - POST to authenticate
@@ -685,17 +706,18 @@ def perform_synthetic(instance, org_id, runner, username, password):
     # STEP 7: Get clients
     # GET oauth2 client id https://grafana.com/api/oauth2/clients/f63a6a46680e384
 
-    synthetic_metrics, synthetic_result, step7_response = step7(config, login_cookies, client_id)
+    synthetic_metrics, synthetic_result, step7_response = step7(
+        config, login_cookies, client_id)
     all_metrics.extend(synthetic_metrics)
     #print step7_response.status_code
     #print step7_response.text
     oauth2_clients = json.loads(step7_response.text)
 
-
     # STEP 8: Get grants
     # GET grants https://grafana.com/api/oauth2/grants?clientId=<CLIENTID>
 
-    synthetic_metrics, synthetic_result, step8_response = step8(config, login_cookies, client_id)
+    synthetic_metrics, synthetic_result, step8_response = step8(
+        config, login_cookies, client_id)
     all_metrics.extend(synthetic_metrics)
     #print step8_response.status_code
     #print step8_response.text
@@ -718,7 +740,6 @@ def perform_synthetic(instance, org_id, runner, username, password):
     #print step9_response.status_code
     #print step9_response.text
 
-
     # STEP 10: Use the code to login to the HG instance
     # GET https://bkgann3.grafana.net/login/grafana_com?code=19e5a25888fb3ad9939df8ea9224ada3908914c8&state=-jFBAiR9O7NH5sL3jC1sq5M1XCXb8yEPbgmXnFl2D3k%3D
     # which will respond with a 302 redirect, and new cookies
@@ -726,8 +747,10 @@ def perform_synthetic(instance, org_id, runner, username, password):
     oauth_token = json.loads(step9_response.text)
     #print oauth_token['redirectUri']
     #print oauth_token['code']
-    config['target'] = '{}?code={}&state={}'.format(oauth_token['redirectUri'], oauth_token['code'], state_hash)
-    synthetic_metrics, synthetic_result, step10_response = step10(config, login_cookies, oauth_token)
+    config['target'] = '{}?code={}&state={}'.format(
+        oauth_token['redirectUri'], oauth_token['code'], state_hash)
+    synthetic_metrics, synthetic_result, step10_response = step10(
+        config, login_cookies, oauth_token)
     #print synthetic_metrics
     all_metrics.extend(synthetic_metrics)
     #print step10_response.status_code
@@ -752,7 +775,8 @@ def perform_synthetic(instance, org_id, runner, username, password):
     #print target
     #print 'target = {}'.format(target)
     config['target'] = target
-    synthetic_metrics, synthetic_result, step11_response = step11(config, final_cookies)
+    synthetic_metrics, synthetic_result, step11_response = step11(
+        config, final_cookies)
     all_metrics.extend(synthetic_metrics)
     #print step11_response.status_code
     #print step11_response.text
@@ -776,6 +800,7 @@ def show_metrics(metrics):
       #print a_metric.toJSON()
       print a_metric.toGRAPHITE()
 
+
 def publish_to_graphite_http(url, metrics):
     print("Url: "+url)
     publish_session = req.Session()
@@ -789,8 +814,9 @@ def publish_to_graphite_http(url, metrics):
       #print(r.status_code, r.reason)
     publish_session.close
 
+
 def publish_to_graphite_crng(hostname, port_number, metrics):
-    print 'publish to graphite: {}:{}'.format(hostname,port_number)
+    print 'publish to graphite: {}:{}'.format(hostname, port_number)
     clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     clientsocket.connect((hostname, int(port_number)))
     for i in range(len(metrics)):
@@ -799,15 +825,18 @@ def publish_to_graphite_crng(hostname, port_number, metrics):
       #print r
     clientsocket.close
 
+
 def publish_metrics(metrics, hostname, port_number, output_type='graphite',):
     print "Publishing Metrics"
     publish_to_graphite_crng(hostname, port_number, metrics)
+
 
 def main():
     """
     run script
     """
-    parser = argparse.ArgumentParser(description='Check Hosted Grafana Login Process.')
+    parser = argparse.ArgumentParser(
+        description='Check Hosted Grafana Login Process.')
     parser.add_argument('-i', '--instance', help='hosted grafana instance name',
                         action='store', dest="instance")
     parser.add_argument('-o', '--orgid', help='hosted grafana orgid',
@@ -833,10 +862,12 @@ def main():
     if 'http_proxy' in os.environ:
         del os.environ['http_proxy']
 
-    all_metrics = perform_synthetic(instance, org_id, runner, username, password)
+    all_metrics = perform_synthetic(
+        instance, org_id, runner, username, password)
     show_metrics(all_metrics)
     publish_metrics(all_metrics, hostname='127.0.0.1', port_number='9003')
     return 0
+
 
 if __name__ == "__main__":
     EXIT_CODE = main()
