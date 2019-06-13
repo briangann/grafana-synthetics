@@ -29,6 +29,7 @@ class SyntheticMetric:
                  metric_type="gauge"):
       self.name = name
       self.value = value
+      self.transaction_timestamp = transaction_timestamp
       self.tags = {}
       self.tags['synthetic_step'] = step_number
       self.tags['runner'] = runner
@@ -64,7 +65,7 @@ class SyntheticMetric:
         #tags_flattened += 'end_timestamp={};'.format(self.tags['end_timestamp'])
         #tags_flattened += 'duration_ms={};'.format(self.tags['duration_ms'])
         #tags_flattened += 'transaction_id={};'.format(self.tags['transaction_id'])
-        return '{};{} {} {}'.format(self.name, tags_flattened, self.value, transaction_timestamp)
+        return '{};{} {} {}'.format(self.name, tags_flattened, self.value, self.transaction_timestamp)
 
 
 def current_milli_time():
